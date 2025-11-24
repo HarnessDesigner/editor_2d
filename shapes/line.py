@@ -27,7 +27,7 @@ class Line:
         self.artist = None
 
         p1.Bind(self._update_artist)
-        p1.Bind(self._update_artist)
+        p2.Bind(self._update_artist)
 
     @property
     def width(self) -> _decimal:
