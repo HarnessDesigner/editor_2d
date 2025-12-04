@@ -125,8 +125,6 @@ class EditorWindow(wx.Panel):
 
             wire.Bind(self._update_wire)
 
-
-
     def update_bitmap(self):
         w, h = self.bmp.GetSize()
         mask_dc = wx.MemoryDC()
