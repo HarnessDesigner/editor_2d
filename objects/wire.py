@@ -1,10 +1,13 @@
 import wx
 
+import math
 
 from ...geometry import point as _point
 from ...geometry import line as _line
 from ...geometry import angle as _angle
 from ...wrappers.decimal import Decimal as _decimal
+
+from .. import wire_info as _wire_info
 
 
 FIVE_0 = _decimal(5.0)
@@ -55,9 +58,9 @@ class WireSection:
 
     def stripe_lines(self):
         line = _line.Line(self.p1, self.p2)
-        line_angle = line.angle
+        line_angle = line.get_angle(self.p1).z
         stripe_line = _line.Line(_point.Point(68, 0), _point.Point(68 - 32, 24))
-        stripe_angle = line_angle + stripe_line.angle
+        stripe_angle = line_angle + stripe_line.get_angle(stripe_line.p1).z
         line_len = len(line)
         step = 40
 
@@ -84,7 +87,7 @@ class WireSection:
         return _line.Line(self.p1, self.p2).length()
 
     def get_angle(self):
-        return _line.Line(self.p1, self.p2).angle
+        return _line.Line(self.p1, self.p2).get_angle(self.p1).z
 
     @staticmethod
     def _rotate_point(origin, point, angle):
@@ -103,23 +106,29 @@ class WireSection:
 
     def move_p2(self, p):
         line = _line.Line(self.p1, p)
-        angle = line.angle
+        angle = line.get_angle(self.p1).z
+        new_angle = _angle.Angle(
+            _point.Point(_decimal(0.0), _decimal(0.0), _decimal(0.0)),
+            _point.Point(_decimal(10.0), _decimal(0.0), _decimal(0.0))
+        )
 
         if 0 <= angle < 45:
-            line = _line.Line(self.p1, None, 0, line.length())
+            line = _line.Line(self.p1, None, line.length(), new_angle)
         if 45 <= angle < 135:
-            line = _line.Line(self.p1, None, 90, line.length())
+            new_angle.z = _decimal(90.0)
+            line = _line.Line(self.p1, None, line.length(), new_angle)
         elif 135 <= angle < 225:
-            line = _line.Line(self.p1, None, 180, line.length())
+            new_angle.z = _decimal(180.0)
+            line = _line.Line(self.p1, None, line.length(), new_angle)
         elif 225 <= angle <= 315:
-            line = _line.Line(self.p1, None, 270, line.length())
+            new_angle.z = _decimal(270.0)
+            line = _line.Line(self.p1, None, line.length(), new_angle)
         else:
-            line = _line.Line(self.p1, None, 0, line.length())
+            line = _line.Line(self.p1, None, line.length(), new_angle)
 
         self.p2 = line.p2
 
     def move(self, p):
-
         p1 = self.p1.copy()
         p2 = self.p2.copy()
 
@@ -141,42 +150,56 @@ class WireSection:
 
         if p3 is not None:
             line = _line.Line(p3, p1)
-            angle = line.angle
+            angle = line.get_angle(p3).z
+            new_angle = _angle.Angle(
+                _point.Point(_decimal(0.0), _decimal(0.0), _decimal(0.0)),
+                _point.Point(_decimal(10.0), _decimal(0.0), _decimal(0.0))
+            )
 
             if 0 <= angle < 45:
-                line = _line.Line(p3, None, 0, line.length())
+                line = _line.Line(p3, None, line.length(), new_angle)
             if 45 <= angle < 135:
-                line = _line.Line(p3, None, 90, line.length())
+                new_angle.z = _decimal(90.0)
+                line = _line.Line(p3, None, line.length(), new_angle)
             elif 135 <= angle < 225:
-                line = _line.Line(p3, None, 180, line.length())
+                new_angle.z = _decimal(180.0)
+                line = _line.Line(p3, None, line.length(), new_angle)
             elif 225 <= angle <= 315:
-                line = _line.Line(p3, None, 270, line.length())
+                new_angle.z = _decimal(270.0)
+                line = _line.Line(p3, None, line.length(), new_angle)
             else:
-                line = _line.Line(p3, None, 0, line.length())
+                line = _line.Line(p3, None, line.length(), new_angle)
 
             p1.x = line.p2.x
             p1.y = line.p2.y
 
         if p4 is not None:
             line = _line.Line(p4, p2)
-            angle = line.angle
+            angle = line.get_angle(p4).z
+            new_angle = _angle.Angle(
+                _point.Point(_decimal(0.0), _decimal(0.0), _decimal(0.0)),
+                _point.Point(_decimal(10.0), _decimal(0.0), _decimal(0.0))
+            )
 
             if 0 <= angle < 45:
-                line = _line.Line(p4, None, 0, line.length())
+                line = _line.Line(p4, None, line.length(), new_angle)
             if 45 <= angle < 135:
-                line = _line.Line(p4, None, 90, line.length())
+                new_angle.z = _decimal(90.0)
+                line = _line.Line(p4, None, line.length(), new_angle)
             elif 135 <= angle < 225:
-                line = _line.Line(p4, None, 180, line.length())
+                new_angle.z = _decimal(180.0)
+                line = _line.Line(p4, None, line.length(), new_angle)
             elif 225 <= angle <= 315:
-                line = _line.Line(p4, None, 270, line.length())
+                new_angle.z = _decimal(270.0)
+                line = _line.Line(p4, None, line.length(), new_angle)
             else:
-                line = _line.Line(p4, None, 0, line.length())
+                line = _line.Line(p4, None, line.length(), new_angle)
 
             p2.x = line.p2.x
             p2.y = line.p2.y
 
         line = _line.Line(p1, p2)
-        angle = line.angle
+        angle = line.get_angle(p1).z
 
         if int(round(angle)) in (0, 90, 180, 270, 360):
             self.p1.x = p1.x
@@ -191,7 +214,7 @@ class Wire:
 
     def __init__(self, parent):
         self.parent = parent
-        self.wire_info = WireInfo()
+        self.wire_info = _wire_info.WireInfo()
         self._sections: list[WireSection] = []
         self._is_selected = False
 
