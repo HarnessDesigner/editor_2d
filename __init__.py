@@ -5,15 +5,18 @@ import wx
 from ..geometry import point as _point
 from ..wrappers.decimal import Decimal as _decimal
 
+from .objects import wire as _wire
+from . import wire_info as _wire_info
+
 if TYPE_CHECKING:
     from ..database import global_db as _global_db
     from ..database import project_db as _project_db
 
 
-class EditorWindow(wx.Panel):
+class Editor2D(wx.Panel):
 
     def __init__(self, parent):
-        self.wire_info_ctrl = parent.wire_info_ctrl
+        # self.wire_info_ctrl = parent.wire_info_ctrl
 
         wx.Panel.__init__(self, parent, wx.ID_ANY, style=wx.BORDER_NONE)
 
@@ -23,8 +26,8 @@ class EditorWindow(wx.Panel):
         self.scale = 1.0
         self.last_scale = 1.0
 
-        self.wires: list[Wire] = []
-        self._selected: WireSection = None
+        self.wires: list[_wire.Wire] = []
+        self._selected: _wire.WireSection = None
         self.last_pos: _point.Point = None
         self._offset = _point.Point(_decimal(0.0), _decimal(0.0))
         self._grabbed_point = None
@@ -206,7 +209,8 @@ class EditorWindow(wx.Panel):
     def on_left_down(self, evt: wx.MouseEvent):
         x, y = evt.GetPosition()
 
-        p = _point.Point(_decimal(x) * _decimal(self.scale) + self._offset.x, _decimal(y) * _decimal(self.scale) + self._offset.y)
+        p = _point.Point(_decimal(x) * _decimal(self.scale) + self._offset.x,
+                         _decimal(y) * _decimal(self.scale) + self._offset.y)
 
         if self._selected is not None and self._grabbed_point is not None:
             self._continue_wire = True
@@ -247,8 +251,10 @@ class EditorWindow(wx.Panel):
         if self._selected is None:
             x, y = evt.GetPosition()
 
-            p = _point.Point(_decimal(x) * _decimal(self.scale) + self._offset.x, _decimal(y) * _decimal(self.scale) + self._offset.y)
-            wire = Wire(self)
+            p = _point.Point(_decimal(x) * _decimal(self.scale) + self._offset.x,
+                             _decimal(y) * _decimal(self.scale) + self._offset.y)
+
+            wire = _wire.Wire(self, )
             self.wire_info_ctrl.set_wire(wire.wire_info)
             self._selected = wire.new_section(p)
             self._grabbed_point = self._selected.p2

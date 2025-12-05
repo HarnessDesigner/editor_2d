@@ -81,7 +81,7 @@ class WireSection:
         return points
 
     def aslist(self):
-        return _line.Line(self.p1, self.p2).aslist()
+        return list(self.p1) + list(self.p2)
 
     def length(self):
         return _line.Line(self.p1, self.p2).length()
@@ -138,7 +138,7 @@ class WireSection:
         p3 = None
         p4 = None
 
-        for section in self.parent._sections:
+        for section in self.parent._sections:  # NOQA
             if section == self:
                 continue
 
@@ -212,9 +212,9 @@ class WireSection:
 
 class Wire:
 
-    def __init__(self, parent):
+    def __init__(self, parent, db_obj):
         self.parent = parent
-        self.wire_info = _wire_info.WireInfo()
+        self.wire_info = _wire_info.WireInfo(db_obj)
         self._sections: list[WireSection] = []
         self._is_selected = False
 
@@ -320,12 +320,6 @@ class Wire:
         self._is_selected = flag
 
     def update_wire_info(self):
-        length = []
-        for section in self._sections:
-            length.append(section.length())
-
-        length = float(sum(length) / _decimal(1000.0))
-        self.wire_info.length_m = length
         self.parent.wire_info_ctrl.update_wire_length()
 
     def get_section(self, p):
