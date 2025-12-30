@@ -2,15 +2,20 @@ from typing import TYPE_CHECKING
 
 import wx
 
+from .. import config as _config
 from ..geometry import point as _point
 from ..wrappers.decimal import Decimal as _decimal
 
-from .objects import wire as _wire
-from . import wire_info as _wire_info
+from ..objects import wire as _wire
+# from . import wire_info as _wire_info
 
 if TYPE_CHECKING:
     from ..database import global_db as _global_db
     from ..database import project_db as _project_db
+
+
+class Config(metaclass=_config.Config):
+    lock_90 = False
 
 
 class Editor2D(wx.Panel):
@@ -26,8 +31,8 @@ class Editor2D(wx.Panel):
         self.scale = 1.0
         self.last_scale = 1.0
 
-        self.wires: list[_wire.Wire] = []
-        self._selected: _wire.WireSection = None
+        # self.wires: list[_wire.Wire] = []
+        # self._selected: _wire.WireSection = None
         self.last_pos: _point.Point = None
         self._offset = _point.Point(_decimal(0.0), _decimal(0.0))
         self._grabbed_point = None
@@ -53,7 +58,7 @@ class Editor2D(wx.Panel):
                 self.points.append(_point.Point(_decimal(x), _decimal(y)))
                 self.point_list.append([x, y])
 
-        cursor = wx.StockCursor(wx.CURSOR_BLANK)
+        cursor = wx.Cursor(wx.CURSOR_BLANK)
         self.SetCursor(cursor)
         self.mouse_pos = None
 
@@ -143,8 +148,8 @@ class Editor2D(wx.Panel):
         dc.SelectObject(bmp)
         gc = wx.GraphicsContext.Create(dc)
 
-        for wire in self.wires:
-            wire.draw(gc, mask_gc, self._selected)
+        # for wire in self.wires:
+        #     wire.draw(gc, mask_gc, self._selected)
 
         mask_dc.SelectObject(wx.NullBitmap)
         mask = wx.Mask(mask_bmp, wx.BLACK)
