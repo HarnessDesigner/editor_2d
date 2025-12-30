@@ -118,7 +118,7 @@ class Editor2D(wx.Panel):
         self.db_splices: list[_pjt_splice.PJTSplice] = list(project_db.pjt_splices_table)
         self.db_housings: list[_pjt_housing.PJTHousing] = list(project_db.pjt_housings_table)
         self.db_terminals: list[_pjt_terminal.PJTTerminal] = list(project_db.pjt_terminals_table)
-        self.db_layouts: list[_pjt_wire2d_layout.PJTWire2DLayout] = list(project_db.pjt_wire_2d_layouts_table)
+        self.db_layouts: list[_pjt_wire2d_layout.PJTWire2DLayout] = list(project_db.pjt_wire2d_layouts_table)
 
         for wire in self.db_wires:
             start_point = wire.start_point2d.point
