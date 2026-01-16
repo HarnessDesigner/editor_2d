@@ -1,2 +1,2 @@
-# editor_2d
+# editor2d
 Schematic editor
