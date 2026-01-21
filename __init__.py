@@ -14,10 +14,6 @@ if TYPE_CHECKING:
     from ..database import project_db as _project_db
 
 
-class Config(metaclass=_config.Config):
-    lock_90 = False
-
-
 class Editor2D(wx.Panel):
 
     def __init__(self, parent):
